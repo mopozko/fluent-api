@@ -87,12 +87,6 @@ namespace ObjectPrinting
         {
             if (customPropertySerialization.ContainsKey(property))
                 return customPropertySerialization[property](property.GetValue(obj)) + Environment.NewLine;
-            if (stringPropertyTrimmingCount.ContainsKey(property))
-            {
-                var value = (string)property.GetValue(obj);
-                var trimmingCount = stringPropertyTrimmingCount[property];
-                return new String(value.Take(trimmingCount).ToArray()) + Environment.NewLine;
-            }
             return PrintToString(property.GetValue(obj), nestingLevel + 1);
         }
 
@@ -121,8 +115,15 @@ namespace ObjectPrinting
             {
                 if (IsIgnoreProperty(propertyInfo))
                     continue;
-                sb.Append(identation + propertyInfo.Name + " = "
-                    + PrintPropertyToString(propertyInfo, obj, nestingLevel + 1));
+                string propertyInString = PrintPropertyToString(propertyInfo, obj, nestingLevel + 1);
+                if (propertyInfo.PropertyType == typeof(string) &&
+                    stringPropertyTrimmingCount.ContainsKey(propertyInfo))
+                {
+                    var trimmingCount = stringPropertyTrimmingCount[propertyInfo];
+                    propertyInString = new string(propertyInString.Take(trimmingCount).ToArray()) + Environment.NewLine;
+                }
+
+                sb.Append(identation + propertyInfo.Name + " = " + propertyInString);
             }
             return sb.ToString();
         }
