@@ -86,7 +86,7 @@ namespace ObjectPrinting
         private string PrintPropertyToString(PropertyInfo property, object obj, int nestingLevel)
         {
             if (customPropertySerialization.ContainsKey(property))
-                return customPropertySerialization[property](property.GetValue(obj)) + Environment.NewLine;
+                return customPropertySerialization[property](property.GetValue(obj));
             return PrintToString(property.GetValue(obj), nestingLevel + 1);
         }
 
@@ -106,24 +106,27 @@ namespace ObjectPrinting
         {
             //TODO apply configurations
             if (TryPrintingUsingCustomRules(obj, out var printingStirng))
-                return printingStirng + Environment.NewLine;
+                return printingStirng;
             var type = obj.GetType();
             var identation = new string('\t', nestingLevel + 1);
             var sb = new StringBuilder();
-            sb.AppendLine(type.Name);
-            foreach (var propertyInfo in type.GetProperties())
+            var allProperties = type.GetProperties();
+            if (allProperties.Length == 0)
+                sb.Append(type.Name);
+            else sb.AppendLine(type.Name);
+            foreach (var propertyInfo in allProperties)
             {
                 if (IsIgnoreProperty(propertyInfo))
                     continue;
-                string propertyInString = PrintPropertyToString(propertyInfo, obj, nestingLevel + 1);
+                var propertyInString = PrintPropertyToString(propertyInfo, obj, nestingLevel + 1);
                 if (propertyInfo.PropertyType == typeof(string) &&
                     stringPropertyTrimmingCount.ContainsKey(propertyInfo))
                 {
                     var trimmingCount = stringPropertyTrimmingCount[propertyInfo];
-                    propertyInString = new string(propertyInString.Take(trimmingCount).ToArray()) + Environment.NewLine;
+                    propertyInString = new string(propertyInString.Take(trimmingCount).ToArray());
                 }
 
-                sb.Append(identation + propertyInfo.Name + " = " + propertyInString);
+                sb.Append(identation + propertyInfo.Name + " = " + propertyInString + Environment.NewLine);
             }
             return sb.ToString();
         }
