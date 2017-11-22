@@ -104,7 +104,6 @@ namespace ObjectPrinting
 
         private string PrintToString(object obj, int nestingLevel)
         {
-            //TODO apply configurations
             if (TryPrintingUsingCustomRules(obj, out var printingStirng))
                 return printingStirng;
             var type = obj.GetType();
@@ -112,8 +111,10 @@ namespace ObjectPrinting
             var sb = new StringBuilder();
             var allProperties = type.GetProperties();
             if (allProperties.Length == 0)
-                sb.Append(type.Name);
-            else sb.AppendLine(type.Name);
+                return type.Name;
+
+            sb.AppendLine(type.Name);
+
             foreach (var propertyInfo in allProperties)
             {
                 if (IsIgnoreProperty(propertyInfo))
@@ -125,8 +126,7 @@ namespace ObjectPrinting
                     var trimmingCount = stringPropertyTrimmingCount[propertyInfo];
                     propertyInString = new string(propertyInString.Take(trimmingCount).ToArray());
                 }
-
-                sb.Append(identation + propertyInfo.Name + " = " + propertyInString + Environment.NewLine);
+                sb.AppendLine(identation + propertyInfo.Name + " = " + propertyInString);
             }
             return sb.ToString();
         }
