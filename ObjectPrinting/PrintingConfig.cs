@@ -10,9 +10,9 @@ namespace ObjectPrinting
 {
     public class PrintingConfig<TOwner> : IPrintingConfig<TOwner>
     {
-        private readonly HashSet<Type> FinalTypes;
-        private readonly HashSet<Type> ExcludingTypes;
-        private readonly HashSet<PropertyInfo> ExcludingProperty;
+        private readonly HashSet<Type> finalTypes;
+        private readonly HashSet<Type> excludingTypes;
+        private readonly HashSet<PropertyInfo> excludingProperty;
 
 
         private readonly Dictionary<Type, Func<object, string>> customTypeSerialization;
@@ -36,13 +36,13 @@ namespace ObjectPrinting
         {
             customPropertySerialization = new Dictionary<PropertyInfo, Func<object, string>>();
             stringPropertyTrimmingCount = new Dictionary<PropertyInfo, int>();
-            FinalTypes = new HashSet<Type>(new[]
+            finalTypes = new HashSet<Type>(new[]
             {
                 typeof(int), typeof(double), typeof(float), typeof(string),
                 typeof(DateTime), typeof(TimeSpan)
             });
-            ExcludingTypes = new HashSet<Type>();
-            ExcludingProperty = new HashSet<PropertyInfo>();
+            excludingTypes = new HashSet<Type>();
+            excludingProperty = new HashSet<PropertyInfo>();
             numbersCulture = new[] { typeof(double), typeof(long), typeof(int) }
             .ToDictionary(x => x, x => CultureInfo.CurrentCulture);
             customTypeSerialization = new Dictionary<Type, Func<object, string>>();
@@ -71,10 +71,10 @@ namespace ObjectPrinting
                 printingStirng = type.GetMethods().Where(x => x.Name == "ToString")
                         .First(x => x.GetParameters().Length == 1 &&
                                     x.GetParameters()[0].ParameterType == typeof(IFormatProvider))
-                        .Invoke(obj, new[] { numbersCulture[type] }).ToString();
+                        .Invoke(obj, new object[] { numbersCulture[type] }).ToString();
                 return true;
             }
-            if (FinalTypes.Contains(type))
+            if (finalTypes.Contains(type))
             {
                 printingStirng = obj.ToString();
                 return true;
@@ -94,9 +94,9 @@ namespace ObjectPrinting
         {
             var propType = property.PropertyType;
 
-            if (ExcludingProperty.Contains(property))
+            if (excludingProperty.Contains(property))
                 return true;
-            if (ExcludingTypes.Contains(propType))
+            if (excludingTypes.Contains(propType))
                 return true;
             return false;
 
@@ -133,7 +133,7 @@ namespace ObjectPrinting
 
         public PrintingConfig<TOwner> Excluding<T>()
         {
-            ExcludingTypes.Add(typeof(T));
+            excludingTypes.Add(typeof(T));
             return this;
         }
 
@@ -154,7 +154,7 @@ namespace ObjectPrinting
         {
             var name = ((MemberExpression)propSelector.Body).Member.Name;
             var property = typeof(TOwner).GetProperty(name);
-            ExcludingProperty.Add(property);
+            excludingProperty.Add(property);
             return this;
         }
     }
