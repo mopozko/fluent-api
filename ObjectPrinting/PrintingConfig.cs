@@ -38,8 +38,9 @@ namespace ObjectPrinting
             stringPropertyTrimmingCount = new Dictionary<PropertyInfo, int>();
             finalTypes = new HashSet<Type>(new[]
             {
-                typeof(int), typeof(double), typeof(float), typeof(string),
-                typeof(DateTime), typeof(TimeSpan)
+                typeof(string),
+                typeof(DateTime),
+                typeof(TimeSpan)
             });
             excludingTypes = new HashSet<Type>();
             excludingProperty = new HashSet<PropertyInfo>();
@@ -109,9 +110,10 @@ namespace ObjectPrinting
             var type = obj.GetType();
             var identation = new string('\t', nestingLevel + 1);
             var sb = new StringBuilder();
+
             var allProperties = type.GetProperties();
             if (allProperties.Length == 0)
-                return type.Name;
+                return obj.ToString();
 
             sb.AppendLine(type.Name);
 
