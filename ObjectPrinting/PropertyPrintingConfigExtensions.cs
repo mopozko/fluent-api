@@ -7,16 +7,15 @@ namespace ObjectPrinting
     public static class PropertyPrintingConfigExtensions
     {
         private static PrintingConfig<TOwner> SetCulture<TOwner,TPropType>
-            (PropertyPrintingConfig<TOwner, TPropType> config,CultureInfo culture)
+            (IPropertyPrintingConfig<TOwner, TPropType> config,CultureInfo culture)
         {
             var supptortTypes = new[] {typeof(int), typeof(double), typeof(long)};
             var type = typeof(TPropType);
 
             if (supptortTypes.All(t => t != type))
                 throw new ArgumentException($"PropertyPrintingConfig with PropType == {type} not supported");
-            
-            IPropertyPrintingConfig<TOwner, TPropType> printingConfig = config;
-            IPrintingConfig<TOwner> parent = printingConfig.ParentConfig;
+
+            IPrintingConfig<TOwner> parent = config.ParentConfig;
             parent.NumbersCulture[typeof(TPropType)] = culture;
             return (PrintingConfig<TOwner>) parent;
         }
@@ -39,11 +38,10 @@ namespace ObjectPrinting
         }
 
         public static PrintingConfig<TOwner> TrimmedToLength<TOwner>
-            (this PropertyPrintingConfig<TOwner, string> config, int trimCount)
+            (this IPropertyPrintingConfig<TOwner, string> config, int trimCount)
         {
-            IPropertyPrintingConfig<TOwner, string> printingConfig = config;
-            IPrintingConfig<TOwner> parent = printingConfig.ParentConfig;
-            var property = printingConfig.Property;
+            IPrintingConfig<TOwner> parent = config.ParentConfig;
+            var property = config.Property;
             parent.StringPropertyTrimmingCount.Add(property,trimCount);
             return (PrintingConfig<TOwner>)parent;
         }
