@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Globalization;
 using System.Linq;
 
@@ -7,7 +6,6 @@ namespace ObjectPrinting
 {
     public static class PropertyPrintingConfigExtensions
     {
-
         private static PrintingConfig<TOwner> SetCulture<TOwner,TPropType>
             (PropertyPrintingConfig<TOwner, TPropType> config,CultureInfo culture)
         {
